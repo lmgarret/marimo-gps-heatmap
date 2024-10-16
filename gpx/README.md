@@ -1,0 +1,1 @@
+Put in this folder any GPX track to use in the notebook.

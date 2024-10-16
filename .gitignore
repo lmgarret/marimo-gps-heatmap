@@ -1,3 +1,9 @@
+# application configuration file
+.conf.json
+
+# gpx tracks
+gpx/*.gpx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
