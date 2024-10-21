@@ -24,7 +24,7 @@ The notebook requires [`marimo`](https://docs.marimo.io/getting_started/index.ht
 uv tool install marimo --upgrade
 ```
 
-The notebook contains the instructions to setup your InfluxDB credentialss and load GPX files. Run the notebook with:
+The notebook contains the instructions to setup your InfluxDB credentials and load GPX files. Run the notebook with:
 
 ```command
 marimo edit --sandbox gps-heatmap.py
