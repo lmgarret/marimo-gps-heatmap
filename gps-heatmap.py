@@ -1,6 +1,7 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
+#     "altair==5.4.1",
 #     "geopandas==1.0.1",
 #     "gpxpy==1.6.2",
 #     "influxdb-client==1.46.0",
@@ -38,7 +39,7 @@ def __(mo):
 
         We use data coming from:
          - InfluxDB, as stored by HomeAssistant when tracking a person's location
-         - GPX files, originally coming from the Android FOSS app OpenTracks and pushed to Nextcloud maps
+         - GPX files, originally coming from the Android FOSS app PhoneTrack and pushed to Nextcloud maps
         Both data sources require some data cleaning and alignement, we'll get back to it later.
 
         Finally, we build a single DataFrame using all these sources, and derive a weight for each data point to ensure that the heatmap is built on the intensity and not the sampling frequency.
@@ -154,13 +155,13 @@ def __(mo):
     mo.md(
         """
         ## Loading from GPX files
-        We now load points coming from GPX files. Initially, when I started keeping track of my location, I was making use of the FOSS Android app OpenTracks, with a job pushing to Nextcloud the device's location. I now only rely on HomeAssistant + InfluxDB since I need the location anyway for some automation tasks.
+        We now load points coming from GPX files. Initially, when I started keeping track of my location, I was making use of the FOSS Android app PhoneTrack, with a job pushing to Nextcloud the device's location. I now only rely on HomeAssistant + InfluxDB since I need the location anyway for some automation tasks.
 
         The GPX files can be put in the `gpx/` directory, and the next cell allows to select which one to use or use all of them.
 
         > More context
         > 
-        > I started recording with OpenTracks since 2020-11, but downloading the .GPX file from Nextcloud maps for my device shows  only records up until 2024-01 (~9 months when this notebook is being written). It's possible that I did erase some of these records by mistake. But fortunately, I did export a backup .GPX file directly from OpenTracks that contains records starting from 2020-11, but missing a few more recent months. So that's why I'm loading from multiple GPX files, also making sure to drop duplicate entries
+        > I started recording with PhoneTrack since 2020-11, but downloading the .GPX file from Nextcloud maps for my device shows  only records up until 2024-01 (~9 months when this notebook is being written). It's possible that I did erase some of these records by mistake. But fortunately, I did export a backup .GPX file directly from PhoneTrack that contains records starting from 2020-11, but missing a few more recent months. So that's why I'm loading from multiple GPX files, also making sure to drop duplicate entries
         """
     )
     return
@@ -183,7 +184,7 @@ def __(mo):
 
 
 @app.cell
-def __(gpx_files, gpxpy, pd, selected_gpx):
+def __(datetime, gpx_files, gpxpy, pd, selected_gpx):
     tmp_gpx_points = []
 
     selected_gpx_files = gpx_files if selected_gpx.value == "All" else [selected_gpx.value]
@@ -194,15 +195,18 @@ def __(gpx_files, gpxpy, pd, selected_gpx):
         # Convert to a dataframe one point at a time.
         for track in gpx.tracks:
             for segment in track.segments:
+                _offset=0
                 for p in segment.points:
                     tmp_gpx_points.append({
-                        'time': p.time,
+                        'time': p.time if p.time else datetime.fromtimestamp(1605006951 + _offset),
                         'latitude': p.latitude,
                         'longitude': p.longitude,
                         #'elevation': p.elevation,
-                })
-    gpx_points = pd.DataFrame.from_records(tmp_gpx_points).drop_duplicates(subset=["time"]).sort_values(by="time", ascending=True)
+                    })
+                    _offset+=1
+    gpx_points = pd.DataFrame.from_records(tmp_gpx_points).drop_duplicates(subset=["time"])
     gpx_points["time"] = pd.to_datetime(gpx_points["time"], utc=True)
+    gpx_points = gpx_points.sort_values(by="time", ascending=True)
     gpx_points
     return (
         f,
@@ -256,6 +260,25 @@ def __(gpx_points, influx_points, pd, start_date):
 
     all_points
     return all_points, gpx_points_filtered, interval_counts, np
+
+
+@app.cell(hide_code=True)
+def __(mo):
+    mo.md(r"""Let's display some distribution information about our data:""")
+    return
+
+
+@app.cell
+def __(all_points, mo):
+    import altair as alt
+
+    monthly_counts = all_points.groupby(all_points["time"].dt.to_period("M")).size().reset_index(name="count")
+    chart = mo.ui.altair_chart(alt.Chart(monthly_counts).mark_bar().encode(
+        x='time',
+        y='count',
+    ))
+    chart
+    return alt, chart, monthly_counts
 
 
 @app.cell(hide_code=True)
