@@ -1,0 +1,8 @@
+{
+    "influxdb": {
+        "token": "<your InfluxDB token>",
+        "url": "https://myinfludb.com:8086",
+        "org": "my-organization",
+        "database": "hass"
+    }
+}

@@ -34,7 +34,7 @@ def __():
 def __(mo):
     mo.md(
         """
-        # Nextcloud + HomeAssisstant based GPS Heatmap
+        # Nextcloud + HomeAssistant based GPS Heatmap
         In this notebook, we load GPS data points from multiple data sources, and derive a heatmap out of it. The time window for the heatmap can be configured with a slider, and some data tables can be tweaked using marimo UI select boxes.
 
         We use data coming from:
