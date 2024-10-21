@@ -19,7 +19,10 @@ Finally, we build a single DataFrame using all these sources, and derive a weigh
 </figure>
 
 ## Running the notebook
-Make sure to install [`marimo`](https://docs.marimo.io/getting_started/index.html). [`uv`](https://docs.astral.sh/uv/getting-started/installation/) is also recommended.
+The notebook requires [`marimo`](https://docs.marimo.io/getting_started/index.html) to run, and [`uv`](https://docs.astral.sh/uv/getting-started/installation/) is recommended. I'd recommend installing the latter first and then installing `marimo` with:
+```command
+uv tool install marimo --upgrade
+```
 
 The notebook contains the instructions to setup your InfluxDB credentialss and load GPX files. Run the notebook with:
 
