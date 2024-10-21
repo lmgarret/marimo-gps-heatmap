@@ -5,12 +5,9 @@
 #     "geopandas==1.0.1",
 #     "gpxpy==1.6.2",
 #     "influxdb-client==1.46.0",
-#     "ipyleaflet==0.19.2",
 #     "leafmap==0.38.5",
 #     "maplibre==0.2.6",
 #     "marimo",
-#     "matplotlib==3.9.2",
-#     "numpy==2.1.2",
 #     "pandas==2.2.3",
 #     "python-dateutil==2.9.0.post0",
 #     "seaborn==0.13.2",
@@ -56,13 +53,14 @@ def __(mo):
 
 
 @app.cell
-def __(mo, pd, time_slider):
+def __(mo, time_slider):
     from datetime import datetime
     from dateutil.relativedelta import relativedelta
+    import pandas as pd
 
     start_date = pd.Timestamp('now').floor('D') + pd.offsets.MonthBegin(-time_slider.value)
     mo.md(f"Start date: {start_date}")
-    return datetime, relativedelta, start_date
+    return datetime, pd, relativedelta, start_date
 
 
 @app.cell(hide_code=True)
@@ -172,7 +170,6 @@ def __(mo):
     import gpxpy
     import os
     import glob
-    import pandas as pd
 
     gpx_files = glob.glob('gpx/*.gpx')
 
@@ -180,7 +177,7 @@ def __(mo):
         label="Select GPX file", options=["All", *gpx_files], value="All"  # default to all files
     )
     selected_gpx
-    return glob, gpx_files, gpxpy, os, pd, selected_gpx
+    return glob, gpx_files, gpxpy, os, selected_gpx
 
 
 @app.cell
@@ -236,8 +233,6 @@ def __(mo):
 
 @app.cell
 def __(gpx_points, influx_points, pd, start_date):
-    import numpy as np
-
     # Filter the dataframes based on the time window
     gpx_points_filtered = gpx_points[gpx_points["time"] >= pd.to_datetime(start_date, utc=True)]
 
@@ -259,7 +254,7 @@ def __(gpx_points, influx_points, pd, start_date):
     all_points["weight"] = all_points["time_bin"].map(lambda x: 1 / interval_counts[x])
 
     all_points
-    return all_points, gpx_points_filtered, interval_counts, np
+    return all_points, gpx_points_filtered, interval_counts
 
 
 @app.cell(hide_code=True)
